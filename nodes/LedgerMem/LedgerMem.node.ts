@@ -81,9 +81,12 @@ export class LedgerMem implements INodeType {
           },
         });
       } else if (operation === 'update') {
+        // URL-encode user-supplied ids — without this a slash or `..` in an id
+        // could rewrite the request path or hit unintended endpoints.
+        const id = encodeURIComponent(String(this.getNodeParameter('id', i)));
         response = await this.helpers.httpRequestWithAuthentication.call(this, 'ledgerMemApi', {
           method: 'PATCH',
-          url: `${baseUrl}/v1/memories/${this.getNodeParameter('id', i)}`,
+          url: `${baseUrl}/v1/memories/${id}`,
           json: true,
           body: {
             content: this.getNodeParameter('content', i),
@@ -91,11 +94,13 @@ export class LedgerMem implements INodeType {
           },
         });
       } else if (operation === 'delete') {
+        const rawId = String(this.getNodeParameter('id', i));
+        const id = encodeURIComponent(rawId);
         await this.helpers.httpRequestWithAuthentication.call(this, 'ledgerMemApi', {
           method: 'DELETE',
-          url: `${baseUrl}/v1/memories/${this.getNodeParameter('id', i)}`,
+          url: `${baseUrl}/v1/memories/${id}`,
         });
-        response = { id: this.getNodeParameter('id', i), deleted: true };
+        response = { id: rawId, deleted: true };
       } else {
         response = await this.helpers.httpRequestWithAuthentication.call(this, 'ledgerMemApi', {
           method: 'GET',

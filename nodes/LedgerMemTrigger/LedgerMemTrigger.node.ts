@@ -50,7 +50,16 @@ export class LedgerMemTrigger implements INodeType {
     const fresh = items.filter((m) => !lastSeen || m.createdAt > lastSeen);
     if (fresh.length === 0) return null;
 
-    this.getWorkflowStaticData('node').lastSeen = fresh[0].createdAt;
+    // The API doesn't guarantee items[0] is the newest, so compute the high
+    // watermark explicitly. Trusting fresh[0] caused the watermark to rewind
+    // when items came back in any order other than newest-first.
+    let nextWatermark = lastSeen;
+    for (const m of fresh) {
+      if (!nextWatermark || m.createdAt > nextWatermark) {
+        nextWatermark = m.createdAt;
+      }
+    }
+    this.getWorkflowStaticData('node').lastSeen = nextWatermark;
     return [fresh.map((json) => ({ json }))];
   }
 }
