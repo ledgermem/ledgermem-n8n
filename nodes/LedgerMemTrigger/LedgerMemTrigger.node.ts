@@ -33,7 +33,18 @@ export class LedgerMemTrigger implements INodeType {
   async poll(this: IPollFunctions): Promise<INodeExecutionData[][] | null> {
     const credentials = await this.getCredentials('ledgerMemApi');
     const baseUrl = (credentials.baseUrl as string) || 'https://api.proofly.dev';
-    const lastSeen = (this.getWorkflowStaticData('node').lastSeen as string) || '';
+    const staticData = this.getWorkflowStaticData('node');
+    const lastSeen = (staticData.lastSeen as string) || '';
+    // Track the ids emitted at exactly the watermark so collisions on
+    // millisecond-precision createdAt don't drop items: a strict `>`
+    // filter skipped every memory that shared a timestamp with the last
+    // emitted one, an `>=` filter re-emitted them. Combine `>=` with an
+    // id allowlist for the boundary timestamp.
+    const seenAtWatermark = new Set<string>(
+      Array.isArray(staticData.seenAtWatermark)
+        ? (staticData.seenAtWatermark as string[])
+        : [],
+    );
 
     const response = (await this.helpers.httpRequestWithAuthentication.call(
       this,
@@ -47,7 +58,12 @@ export class LedgerMemTrigger implements INodeType {
     )) as { items?: Array<{ id: string; createdAt: string }> };
 
     const items = response.items ?? [];
-    const fresh = items.filter((m) => !lastSeen || m.createdAt > lastSeen);
+    const fresh = items.filter((m) => {
+      if (!lastSeen) return true;
+      if (m.createdAt > lastSeen) return true;
+      if (m.createdAt === lastSeen && !seenAtWatermark.has(m.id)) return true;
+      return false;
+    });
     if (fresh.length === 0) return null;
 
     // The API doesn't guarantee items[0] is the newest, so compute the high
@@ -59,7 +75,14 @@ export class LedgerMemTrigger implements INodeType {
         nextWatermark = m.createdAt;
       }
     }
-    this.getWorkflowStaticData('node').lastSeen = nextWatermark;
+    const idsAtWatermark = new Set<string>(
+      nextWatermark === lastSeen ? seenAtWatermark : [],
+    );
+    for (const m of fresh) {
+      if (m.createdAt === nextWatermark) idsAtWatermark.add(m.id);
+    }
+    staticData.lastSeen = nextWatermark;
+    staticData.seenAtWatermark = Array.from(idsAtWatermark);
     return [fresh.map((json) => ({ json }))];
   }
 }

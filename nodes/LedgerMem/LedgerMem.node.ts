@@ -110,7 +110,14 @@ export class LedgerMem implements INodeType {
           });
         }
 
-        results.push({ json: response as Record<string, unknown> });
+        // Always emit pairedItem so downstream nodes can map outputs back
+        // to the originating input — without it, expressions referencing
+        // sibling fields ($item, $node[...].pairedItem) silently lose the
+        // mapping and resolve to the first input item across the batch.
+        results.push({
+          json: response as Record<string, unknown>,
+          pairedItem: { item: i },
+        });
       } catch (err) {
         // Honour the workflow's "Continue On Fail" toggle — without this a
         // single bad item (e.g. an invalid id mid-batch) aborts the entire
