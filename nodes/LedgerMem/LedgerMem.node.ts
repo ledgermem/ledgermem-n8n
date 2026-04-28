@@ -58,58 +58,73 @@ export class LedgerMem implements INodeType {
       const operation = this.getNodeParameter('operation', i) as string;
       let response: unknown;
 
-      if (operation === 'add') {
-        response = await this.helpers.httpRequestWithAuthentication.call(this, 'ledgerMemApi', {
-          method: 'POST',
-          url: `${baseUrl}/v1/memories`,
-          json: true,
-          body: {
-            content: this.getNodeParameter('content', i),
-            metadata: this.getNodeParameter('metadata', i),
-            actorId: this.getNodeParameter('actorId', i, '') || undefined,
-          },
-        });
-      } else if (operation === 'search') {
-        response = await this.helpers.httpRequestWithAuthentication.call(this, 'ledgerMemApi', {
-          method: 'POST',
-          url: `${baseUrl}/v1/search`,
-          json: true,
-          body: {
-            query: this.getNodeParameter('query', i),
-            limit: this.getNodeParameter('limit', i),
-            actorId: this.getNodeParameter('actorId', i, '') || undefined,
-          },
-        });
-      } else if (operation === 'update') {
-        // URL-encode user-supplied ids — without this a slash or `..` in an id
-        // could rewrite the request path or hit unintended endpoints.
-        const id = encodeURIComponent(String(this.getNodeParameter('id', i)));
-        response = await this.helpers.httpRequestWithAuthentication.call(this, 'ledgerMemApi', {
-          method: 'PATCH',
-          url: `${baseUrl}/v1/memories/${id}`,
-          json: true,
-          body: {
-            content: this.getNodeParameter('content', i),
-            metadata: this.getNodeParameter('metadata', i),
-          },
-        });
-      } else if (operation === 'delete') {
-        const rawId = String(this.getNodeParameter('id', i));
-        const id = encodeURIComponent(rawId);
-        await this.helpers.httpRequestWithAuthentication.call(this, 'ledgerMemApi', {
-          method: 'DELETE',
-          url: `${baseUrl}/v1/memories/${id}`,
-        });
-        response = { id: rawId, deleted: true };
-      } else {
-        response = await this.helpers.httpRequestWithAuthentication.call(this, 'ledgerMemApi', {
-          method: 'GET',
-          url: `${baseUrl}/v1/memories`,
-          qs: { limit: this.getNodeParameter('limit', i) },
-        });
-      }
+      try {
+        if (operation === 'add') {
+          response = await this.helpers.httpRequestWithAuthentication.call(this, 'ledgerMemApi', {
+            method: 'POST',
+            url: `${baseUrl}/v1/memories`,
+            json: true,
+            body: {
+              content: this.getNodeParameter('content', i),
+              metadata: this.getNodeParameter('metadata', i),
+              actorId: this.getNodeParameter('actorId', i, '') || undefined,
+            },
+          });
+        } else if (operation === 'search') {
+          response = await this.helpers.httpRequestWithAuthentication.call(this, 'ledgerMemApi', {
+            method: 'POST',
+            url: `${baseUrl}/v1/search`,
+            json: true,
+            body: {
+              query: this.getNodeParameter('query', i),
+              limit: this.getNodeParameter('limit', i),
+              actorId: this.getNodeParameter('actorId', i, '') || undefined,
+            },
+          });
+        } else if (operation === 'update') {
+          // URL-encode user-supplied ids — without this a slash or `..` in an id
+          // could rewrite the request path or hit unintended endpoints.
+          const id = encodeURIComponent(String(this.getNodeParameter('id', i)));
+          response = await this.helpers.httpRequestWithAuthentication.call(this, 'ledgerMemApi', {
+            method: 'PATCH',
+            url: `${baseUrl}/v1/memories/${id}`,
+            json: true,
+            body: {
+              content: this.getNodeParameter('content', i),
+              metadata: this.getNodeParameter('metadata', i),
+            },
+          });
+        } else if (operation === 'delete') {
+          const rawId = String(this.getNodeParameter('id', i));
+          const id = encodeURIComponent(rawId);
+          await this.helpers.httpRequestWithAuthentication.call(this, 'ledgerMemApi', {
+            method: 'DELETE',
+            url: `${baseUrl}/v1/memories/${id}`,
+          });
+          response = { id: rawId, deleted: true };
+        } else {
+          response = await this.helpers.httpRequestWithAuthentication.call(this, 'ledgerMemApi', {
+            method: 'GET',
+            url: `${baseUrl}/v1/memories`,
+            qs: { limit: this.getNodeParameter('limit', i) },
+          });
+        }
 
-      results.push({ json: response as Record<string, unknown> });
+        results.push({ json: response as Record<string, unknown> });
+      } catch (err) {
+        // Honour the workflow's "Continue On Fail" toggle — without this a
+        // single bad item (e.g. an invalid id mid-batch) aborts the entire
+        // workflow run and discards already-processed items downstream.
+        if (this.continueOnFail()) {
+          const message = err instanceof Error ? err.message : String(err);
+          results.push({
+            json: { error: message },
+            pairedItem: { item: i },
+          });
+          continue;
+        }
+        throw err;
+      }
     }
 
     return [results];
