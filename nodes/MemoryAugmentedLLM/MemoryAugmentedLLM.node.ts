@@ -8,12 +8,12 @@ import {
 
 export class MemoryAugmentedLLM implements INodeType {
   description: INodeTypeDescription = {
-    displayName: 'LedgerMem Augmented LLM',
+    displayName: 'Mnemo Augmented LLM',
     name: 'memoryAugmentedLLM',
-    icon: 'file:../LedgerMem/ledgermem.svg',
+    icon: 'file:../Mnemo/getmnemo.svg',
     group: ['transform'],
     version: 1,
-    description: 'Searches LedgerMem then sends prompt + retrieved memories to an LLM',
+    description: 'Searches Mnemo then sends prompt + retrieved memories to an LLM',
     defaults: { name: 'Memory-Augmented LLM' },
     inputs: [NodeConnectionType.Main],
     outputs: [NodeConnectionType.Main],
@@ -32,7 +32,7 @@ export class MemoryAugmentedLLM implements INodeType {
     const items = this.getInputData();
     const out: INodeExecutionData[] = [];
     const lmCreds = await this.getCredentials('ledgerMemApi');
-    const baseUrl = (lmCreds.baseUrl as string) || 'https://api.proofly.dev';
+    const baseUrl = (lmCreds.baseUrl as string) || 'https://api.getmnemo.xyz';
 
     for (let i = 0; i < items.length; i++) {
       const prompt = this.getNodeParameter('prompt', i) as string;

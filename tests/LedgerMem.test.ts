@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { LedgerMem } from '../nodes/LedgerMem/LedgerMem.node';
+import { Mnemo } from '../nodes/Mnemo/Mnemo.node';
 
 const makeContext = (op: string, params: Record<string, unknown>) => {
   const requestMock = vi.fn();
@@ -8,7 +8,7 @@ const makeContext = (op: string, params: Record<string, unknown>) => {
     getCredentials: vi.fn().mockResolvedValue({
       apiKey: 'k',
       workspaceId: 'w',
-      baseUrl: 'https://api.proofly.dev',
+      baseUrl: 'https://api.getmnemo.xyz',
     }),
     getNodeParameter: (name: string, _i: number, fallback?: unknown) =>
       name === 'operation' ? op : params[name] ?? fallback,
@@ -17,10 +17,10 @@ const makeContext = (op: string, params: Record<string, unknown>) => {
   return { ctx, requestMock };
 };
 
-describe('LedgerMem node', () => {
-  let node: LedgerMem;
+describe('Mnemo node', () => {
+  let node: Mnemo;
   beforeEach(() => {
-    node = new LedgerMem();
+    node = new Mnemo();
   });
 
   it('add → POST /v1/memories', async () => {

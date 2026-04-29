@@ -5,10 +5,10 @@
   "categories": ["AI", "Data & Storage"],
   "resources": {
     "credentialDocumentation": [
-      { "url": "https://docs.proofly.dev/integrations/n8n#credentials" }
+      { "url": "https://docs.getmnemo.xyz/integrations/n8n#credentials" }
     ],
     "primaryDocumentation": [
-      { "url": "https://docs.proofly.dev/integrations/n8n" }
+      { "url": "https://docs.getmnemo.xyz/integrations/n8n" }
     ]
   }
 }

@@ -1,12 +1,12 @@
 {
-  "name": "n8n-nodes-ledgermem",
+  "name": "n8n-nodes-getmnemo",
   "version": "0.1.0",
-  "description": "n8n community nodes for LedgerMem — long-term memory for AI agents",
-  "keywords": ["n8n-community-node-package", "ledgermem", "memory", "ai", "rag"],
+  "description": "n8n community nodes for Mnemo — long-term memory for AI agents",
+  "keywords": ["n8n-community-node-package", "getmnemo", "memory", "ai", "rag"],
   "license": "MIT",
-  "homepage": "https://proofly.dev",
-  "author": { "name": "LedgerMem", "email": "founders@proofly.dev" },
-  "repository": { "type": "git", "url": "git+https://github.com/ledgermem/ledgermem-n8n.git" },
+  "homepage": "https://getmnemo.xyz",
+  "author": { "name": "Mnemo", "email": "founders@getmnemo.xyz" },
+  "repository": { "type": "git", "url": "git+https://github.com/getmnemo/getmnemo-n8n.git" },
   "main": "index.js",
   "scripts": {
     "build": "tsc && gulp build:icons",
@@ -17,10 +17,10 @@
   "files": ["dist"],
   "n8n": {
     "n8nNodesApiVersion": 1,
-    "credentials": ["dist/credentials/LedgerMemApi.credentials.js"],
+    "credentials": ["dist/credentials/MnemoApi.credentials.js"],
     "nodes": [
-      "dist/nodes/LedgerMem/LedgerMem.node.js",
-      "dist/nodes/LedgerMemTrigger/LedgerMemTrigger.node.js",
+      "dist/nodes/Mnemo/Mnemo.node.js",
+      "dist/nodes/MnemoTrigger/MnemoTrigger.node.js",
       "dist/nodes/MemoryAugmentedLLM/MemoryAugmentedLLM.node.js"
     ]
   },

@@ -6,15 +6,15 @@ import {
   NodeConnectionType,
 } from 'n8n-workflow';
 
-export class LedgerMem implements INodeType {
+export class Mnemo implements INodeType {
   description: INodeTypeDescription = {
-    displayName: 'LedgerMem',
+    displayName: 'Mnemo',
     name: 'ledgerMem',
-    icon: 'file:ledgermem.svg',
+    icon: 'file:getmnemo.svg',
     group: ['transform'],
     version: 1,
-    description: 'Read and write memories in LedgerMem',
-    defaults: { name: 'LedgerMem' },
+    description: 'Read and write memories in Mnemo',
+    defaults: { name: 'Mnemo' },
     inputs: [NodeConnectionType.Main],
     outputs: [NodeConnectionType.Main],
     credentials: [{ name: 'ledgerMemApi', required: true }],
@@ -52,7 +52,7 @@ export class LedgerMem implements INodeType {
     const items = this.getInputData();
     const results: INodeExecutionData[] = [];
     const credentials = await this.getCredentials('ledgerMemApi');
-    const baseUrl = (credentials.baseUrl as string) || 'https://api.proofly.dev';
+    const baseUrl = (credentials.baseUrl as string) || 'https://api.getmnemo.xyz';
 
     for (let i = 0; i < items.length; i++) {
       const operation = this.getNodeParameter('operation', i) as string;

@@ -6,15 +6,15 @@ import {
   NodeConnectionType,
 } from 'n8n-workflow';
 
-export class LedgerMemTrigger implements INodeType {
+export class MnemoTrigger implements INodeType {
   description: INodeTypeDescription = {
-    displayName: 'LedgerMem Trigger',
+    displayName: 'Mnemo Trigger',
     name: 'ledgerMemTrigger',
-    icon: 'file:../LedgerMem/ledgermem.svg',
+    icon: 'file:../Mnemo/getmnemo.svg',
     group: ['trigger'],
     version: 1,
     description: 'Triggers when new memories are added to the workspace',
-    defaults: { name: 'LedgerMem Trigger' },
+    defaults: { name: 'Mnemo Trigger' },
     polling: true,
     inputs: [],
     outputs: [NodeConnectionType.Main],
@@ -32,7 +32,7 @@ export class LedgerMemTrigger implements INodeType {
 
   async poll(this: IPollFunctions): Promise<INodeExecutionData[][] | null> {
     const credentials = await this.getCredentials('ledgerMemApi');
-    const baseUrl = (credentials.baseUrl as string) || 'https://api.proofly.dev';
+    const baseUrl = (credentials.baseUrl as string) || 'https://api.getmnemo.xyz';
     const staticData = this.getWorkflowStaticData('node');
     const lastSeen = (staticData.lastSeen as string) || '';
     // Track the ids emitted at exactly the watermark so collisions on

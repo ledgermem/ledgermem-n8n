@@ -5,10 +5,10 @@ import {
   INodeProperties,
 } from 'n8n-workflow';
 
-export class LedgerMemApi implements ICredentialType {
+export class MnemoApi implements ICredentialType {
   name = 'ledgerMemApi';
-  displayName = 'LedgerMem API';
-  documentationUrl = 'https://docs.proofly.dev/integrations/n8n';
+  displayName = 'Mnemo API';
+  documentationUrl = 'https://docs.getmnemo.xyz/integrations/n8n';
 
   properties: INodeProperties[] = [
     {
@@ -30,7 +30,7 @@ export class LedgerMemApi implements ICredentialType {
       displayName: 'Base URL',
       name: 'baseUrl',
       type: 'string',
-      default: 'https://api.proofly.dev',
+      default: 'https://api.getmnemo.xyz',
     },
   ];
 
